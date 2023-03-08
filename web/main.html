@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+ 	<meta charset="utf-8">
+  	<title>program_rzd</title>
+
+  	<script src="eel.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  	<link rel="stylesheet" href="main.css">
+
+</head>
+<body>
+
+	<form action="" class="ui-form">
+		<h3>Рассчёт оптимального расстояния между ж/д станциями</h3>
+		<div class="form-row">
+			<input type="text" id="a_point" required autocomplete="off">
+			<label for="a_point">Наименование станции отправления</label>
+		</div>
+		<div class="form-row">
+			<input type="text" id="b_point" required autocomplete="off">
+			<label for="b_point">Наименование станции назначения</label>
+		</div>
+
+    <!-- Пока в программе можно найти расстояния только между станциями октябрьской железной дороги -->
+    <!-- Для других веток ЖД нужно будет строить новый граф -->
+    <!-- Пока на экране выводится только форма с выбором возможных вариантов ЖД веток РФ, но к данному визуалу еще не прикручена логика -->
+			<p class="spisok">Железная дорога</p>
+		    <select>
+		        <option>Октябрьская</option>
+		        <option>Дальневосточная</option>  
+		        <option>Горьковская</option>
+		        <option>Забайкальская </option>
+		        <option>Восточно-сибирская</option>
+		    </select>
+		</span>
+
+		<p><input type="button" value="Рассчитать" id="send_msg"></p>
+		<div id="info" class="position"></div>
+
+		<div class="position3"> </div>
+		<h3>Убрать станцию из графа ж/д пути</h3>
+		<div class="form-row">
+			<input type="text" id="station_delete" required autocomplete="off">
+			<label for="station_delete">Введите наименование станции для удаления</label>
+		</div>
+
+		<p><input type="button" value="Перестроить маршрут" id="send"></p>
+		<div id="info_value" class="position"></div>
+
+		<div class="container">
+    		<span class="choose">Рассмотреть альтернативный маршрут</span>
+		      <div class="dropdown">
+		        <div class="select">
+		          <span>Click</span>
+		          <i class="fa fa-chevron-left"></i>
+		        </div>
+		        <input type="hidden" name="gender">
+		        <ul class="dropdown-menu">
+		          <li id="Самый длинный маршрут">Самый длинный маршрут</li>
+		          <li id="+ 500 км.">+ 500 км.</li>
+		          <li id="3">+ 1000 км.</li>
+		          <li id="4">+ 1500 км.</li>
+		        </ul>
+		      </div> 
+  			<span class="msg"></span>
+		</div>
+
+		<div class="layer2">
+			<i>Построение альтернативного маршрута в зависимости от длины и расстояния между стнациями занимает не более одной минуты</i>
+  		</div>
+
+		<div id="demo" class="position2"></div>
+
+	</form>
+
+  <!-- Функция display и display_delete_station нужны для расчета оптимального расстояния и оптимального расстояния при удалении какой-либо станции -->
+  <!-- Дублирование кода нужно будет исправить  -->
+	<script type="text/javascript">
+  		
+  		async function display () {
+  			let a_point = document.getElementById('a_point').value;
+  			let b_point = document.getElementById('b_point').value;
+
+  			let result = await eel.input_data(a_point, b_point)();
+  			document.getElementById('info').innerHTML = result;
+  		}
+
+    	$('#send_msg').click(function(){
+        	display();
+    	});
+  </script>
+
+  <script type="text/javascript">
+  		
+  		async function display_delete_station () {
+  			let station_delete = document.getElementById('station_delete').value;
+  			let a_point__ = document.getElementById('a_point').value;
+  			let b_point__ = document.getElementById('b_point').value;
+
+  			let result_station = await eel.delete_s(station_delete, a_point__, b_point__)();
+  			document.getElementById('info_value').innerHTML = result_station;
+  		}
+
+    	$('#send').click(function(){
+        	display_delete_station();
+    	});
+  </script>
+
+  
+  <script type="text/javascript">
+      /*		
+    Пока на экране выводится только форма с выбором возможных вариантов удленения маршрута, но логика просчета маршрутов еще не прикручена
+    */
+		$('.dropdown').click(function () {
+        	$(this).attr('tabindex', 1).focus();
+        	$(this).toggleClass('active');
+        	$(this).find('.dropdown-menu').slideToggle(300);
+    	});
+    	$('.dropdown').focusout(function () {
+        	$(this).removeClass('active');
+        	$(this).find('.dropdown-menu').slideUp(300);
+    	});
+    	$('.dropdown .dropdown-menu li').click(function () {
+        	$(this).parents('.dropdown').find('span').text($(this).text());
+        	$(this).parents('.dropdown').find('input').attr('value', $(this).attr('id'));
+    	});
+
+		$('.dropdown-menu li').click(function () {
+  			var input = '<strong>' + $(this).parents('.dropdown').find('input').val() + '</strong>';
+      		msg = '<span class="msg">Выбрано: ';
+  			$('.msg').html(msg + input + '</span>');
+  			var xxx = input
+  			if (xxx == '<strong>'+'Самый длинный маршрут'+'</strong>') {
+  				alert( 'Подтвердите выбор' );
+  				display2();
+			} else if (xxx == '<strong>'+'+ 500 км.'+'</strong>'){
+				alert( 'Подтвердите выбор' );
+			}
+		});
+
+    /*
+    async function display2 () {
+        let a_point_ = document.getElementById('a_point').value;
+        let b_point_ = document.getElementById('b_point').value;
+
+        let result_ = await eel.longest_way(a_point_, b_point_)();
+        document.getElementById('demo').innerHTML = result_;
+      }
+      */
+  </script>
+</body>
+</html>
